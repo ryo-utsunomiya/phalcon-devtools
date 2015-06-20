@@ -433,21 +433,22 @@ class Model extends Component
         $setters = array();
         $getters = array();
         foreach ($fields as $field) {
+            if (array_key_exists(strtolower($field->getName()), $exclude)) {
+                continue;
+            }
             $type = $this->getPHPType($field->getType());
-            if (!array_key_exists(strtolower($field->getName()), $exclude)) {
-                if ($useSettersGetters) {
-                    $attributes[] = $this->snippet->getAttributes($type, 'protected', $field->getName());
-                    $setterName = Utils::camelize($field->getName());
-                    $setters[] = $this->snippet->getSetter($field->getName(), $type, $setterName);
+            if ($useSettersGetters) {
+                $attributes[] = $this->snippet->getAttributes($type, 'protected', $field->getName());
+                $setterName = Utils::camelize($field->getName());
+                $setters[] = $this->snippet->getSetter($field->getName(), $type, $setterName);
 
-                    if (isset($this->_typeMap[$type])) {
-                        $getters[] = $this->snippet->getGetterMap($field->getName(), $type, $setterName, $this->_typeMap[$type]);
-                    } else {
-                        $getters[] = $this->snippet->getGetter($field->getName(), $type, $setterName);
-                    }
+                if (isset($this->_typeMap[$type])) {
+                    $getters[] = $this->snippet->getGetterMap($field->getName(), $type, $setterName, $this->_typeMap[$type]);
                 } else {
-                    $attributes[] = $this->snippet->getAttributes($type, 'public', $field->getName());
+                    $getters[] = $this->snippet->getGetter($field->getName(), $type, $setterName);
                 }
+            } else {
+                $attributes[] = $this->snippet->getAttributes($type, 'public', $field->getName());
             }
         }
 
